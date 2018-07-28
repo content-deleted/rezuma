@@ -27,6 +27,9 @@ typedef struct entity {
 
     UBYTE spriteAddress; // Stores the starting position of the current spite
     animationState * currentAnimation;
+    // There's probably an easy way to reduce this size
+    UINT8 currentFrame; // Stores the number frame (0 indexed)
+    UINT8 ticks; // Stores the ticks past since switching to this frame of the animation
 } entity;
 
 //Player Animations
@@ -60,8 +63,6 @@ void updatePosition(entity *e) {
     updateAnimation(e);
 
     //check directions and update position
-    if(e->direction & up) e->position.y--;
-    if(e->direction & down) e->position.y++;
     if(e->direction & left) {e->position.x--; e->facing = 0U;}
     if(e->direction & right) {e->position.x++; e->facing = 1U;}
 
@@ -87,23 +88,22 @@ void setAnimation(entity *e, animationState *a){
     if(e->currentAnimation != a) e->currentAnimation = a;
 }
 
-//increment every frame
-UINT8 currentFrame = 0U;
-UINT8 ticks = 0U;
+
 
 void updateAnimation(entity *e) {
-    if(ticks > e->currentAnimation->speed) {
-        ticks = 0U; 
-        currentFrame++;
+    if(e->ticks > e->currentAnimation->speed) {
+        e->ticks = 0U; 
+        e->currentFrame++;
     }
-    if(currentFrame > e->currentAnimation->length) currentFrame = 0U;
+    if(e->currentFrame > e->currentAnimation->length) e->currentFrame = 0U;
 
     // Here the sprite address on entity represents which sprite slot we use in sprite memory
     // The current animation address is where in VRAM the first tile of the first frame is stored
     // Each sprite address is one apart since we use two adjacent positions for each half of the spite
     // We add the current frame x4 to the animation address because each 'sprite' is 4 8x8 tiles
     // The offset of two in the current frame on the second tile is due to the next half being stored 2 tiles away in VRAM (this is very important)
-    set_sprite_tile(e->spriteAddress + 0U, e->currentAnimation->address + currentFrame * 4U);
-    set_sprite_tile(e->spriteAddress + 1U, e->currentAnimation->address + 2U + currentFrame * 4U);
-    ticks++;
+    set_sprite_tile(e->spriteAddress + 0U, e->currentAnimation->address + e->currentFrame * 4U);
+    set_sprite_tile(e->spriteAddress + 1U, e->currentAnimation->address + 2U + e->currentFrame * 4U);
+
+    e->ticks++;
 }

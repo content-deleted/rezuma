@@ -1,5 +1,5 @@
 #include <gb/gb.h>
-#include "SlimeTest.c"
+#include "PlayerSpriteSheet.c"
 #include "entity.c"
 
 //global def
@@ -12,10 +12,12 @@ UINT8 i,j = 0;
 
 entity Player = {
     0x00,
-    {0x20,0x20},
+    {0x20,0x90},
     0x00,
     0U,
-    &PlayerStand
+    &PlayerStand,
+    0U,
+    0U,
 };
 
 void main() {
