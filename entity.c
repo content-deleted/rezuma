@@ -37,14 +37,14 @@ typedef struct entity {
 //Player Animations
 
 animationState PlayerStand = {
-    1U, //length zero indexed
+    2U, //length 
     32U, //speed
     0x00,
     0x00
 };
 
 animationState PlayerRun = {
-    2U, //length zero indexed
+    3U, //length 
     10U, //speed
     0x00,
     0xC //first frame
@@ -52,7 +52,7 @@ animationState PlayerRun = {
 
 animationState PlayerJump = {
     1U, //length zero indexed
-    16U, //speed
+    3U, //speed
     0x01, //play once
     0x14 //first frame
 };
@@ -89,7 +89,7 @@ void updatePosition(entity *e) {
     }
 
     if(e->flags & airborn){
-        INT8 inc = checkTileCollision(e->position.y, (e->currentFrame < e->currentAnimation->length) ? -4 : 2);
+        INT8 inc = checkTileCollision(e->position.y, (e->currentFrame < e->currentAnimation->length) ? -2 : 1);
         if(!inc) e->flags &= ~airborn;
         e->position.y += inc;
     }
