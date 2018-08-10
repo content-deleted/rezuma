@@ -89,7 +89,8 @@ void updatePosition(entity *e) {
     }
 
     if(e->flags & airborn){
-        INT8 inc = checkTileCollision(e->position.y, (e->currentFrame < e->currentAnimation->length) ? -2 : 1);
+        UINT8 verticalMovement = (e->currentFrame < e->currentAnimation->length) ? -2 : 1;
+        INT8 inc = checkTileCollision(e->position.y, verticalMovement);
         if(!inc) e->flags &= ~airborn;
         e->position.y += inc;
     }
@@ -149,7 +150,7 @@ void updateAnimation(entity *e) {
 // If there is a collision then it's the amount to that collision
 // Else it's just the movement
 INT8 checkTileCollision(UINT8 current, INT8 move) {
-    return (current+move > 0x90 || current+move <= 0x00)
+    return (current+move > 0x81 || current+move <= 0x00)
     ? 0 // When we move to tile collision itll look more like: (move % 8) * move
     : move;
 }

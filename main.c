@@ -1,6 +1,8 @@
 #include <gb/gb.h>
 #include "PlayerSpriteSheet.c"
 #include "entity.c"
+#include "testTileData.c"
+#include "testMap.c"
 
 //global def
 void init();
@@ -12,7 +14,7 @@ UINT8 i,j = 0;
 
 entity Player = {
     0x00,
-    {0x20,0x90},
+    {0x20,0x81},
     0x00,
     0U,
     &PlayerStand,
@@ -42,6 +44,9 @@ void init() {
     // Use the 'backgroundMap' array to write background tiles starting at 32,32 (tile positions)
 	//  and write for 2 tiles in width and 1 tiles in height
 	//set_bkg_tiles(0, 0,pants_tile_map_width,pants_tile_map_height, pants1);
+
+    set_bkg_data(0U, 12U, testTileData);
+    set_bkg_tiles(0, 0, 0x14,0x14, testMap);
 
     //test load sprite into memory
     SPRITES_8x16;
