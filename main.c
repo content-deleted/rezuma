@@ -89,42 +89,33 @@ const levelHeight = 40U; // These consts should be handled in a level load once 
 const levelWidth = 100U; 
 const SCREENTILEWIDTH = SCREENWIDTH/8;
 const SCREENTILEHEIGHT = SCREENHEIGHT/8;
+const VRAMWIDTH = 0x20;
 
-UINT16 BKPREVIOUSX;
-UINT16 a, b;
+UINT16 BKPREVIOUSX = 0U;
+UINT8 a;
+UINT16 b;
 
 void updateWindow() {
-    if(Player.position.x > SCREENWIDTH/2 ) // && ((Player.position.x + SCREENWIDTH/2)/8 < levelWidth) ) 
+    if( Player.position.x > SCREENWIDTH/2 && (Player.position.x + SCREENWIDTH/2) < levelWidth * 8 ) 
     {    
         BKPREVIOUSX = bkgPosition.x;
         bkgPosition.x = Player.position.x - SCREENWIDTH/2;
         
-        /*
-        // Load tiles into vram
-        for(i = 0; i < SCREENTILEHEIGHT; i++){
-            set_bkg_tiles(bkgPosition.x / 8 + (( bkgPosition.x < BKPREVIOUSX ) ? -1 : SCREENTILEWIDTH + 1), i,
-                          0x1, 0x1,
-                          &testMapLarge + levelWidth * i + ( ( bkgPosition.x < BKPREVIOUSX ) ? bkgPosition.x  : bkgPosition.x + SCREENWIDTH ) / 8 );
-        } 
-        */
-        
-        b = ( ( bkgPosition.x < BKPREVIOUSX ) ? bkgPosition.x : bkgPosition.x + SCREENWIDTH ) / 8 ;
+        if( BKPREVIOUSX/8 != bkgPosition.x/8 ) {
+            a =  (bkgPosition.x / 8 + (( bkgPosition.x < BKPREVIOUSX ) ? 0 : SCREENTILEWIDTH)) % VRAMWIDTH;    
+            b =  ( ( bkgPosition.x < BKPREVIOUSX ) ? bkgPosition.x : bkgPosition.x + SCREENWIDTH ) / 16 ;
 
-        // Load tiles into vram
-        for(i = 0; i < SCREENTILEHEIGHT; i++) 
-        {
-            set_bkg_tiles(a, i, 
-            0x1, 0x1, 
-            &testMapLarge + levelWidth/2 * i + b/2);
+            // Load tiles into vram
+            for(i = 0; i < SCREENTILEHEIGHT; i++) 
+            {
+                set_bkg_tiles(a, i, 
+                0x1, 0x1, 
+                &testMapLarge + levelWidth/2 * i + b);
+            }
+
         }
 
-        a = bkgPosition.x / 8 + (( bkgPosition.x < BKPREVIOUSX ) ? 0 : SCREENTILEWIDTH);
-        /*set_bkg_tiles(bkgPosition.x / 8 + (( bkgPosition.x < BKPREVIOUSX ) ? SCREENTILEWIDTH + 1 : -1), 0, 
-        0x1, SCREENTILEHEIGHT, 
-        &testMapLarge + levelHeight * ( ( bkgPosition.x < BKPREVIOUSX ) ? (bkgPosition.x + SCREENWIDTH)/ 8 : bkgPosition.x ) ); 
-        */
         move_bkg(bkgPosition.x, bkgPosition.y);
-
     }
     /* if( bkgPosition.x < BKPREVIOUSX )
     //if( (Player.position.x + SCREENWIDTH/2) / 8 < levelWidth ) 
