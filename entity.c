@@ -7,7 +7,11 @@ typedef struct point {
     UINT8 y;
 } point;
 
-// Possibly unused
+typedef struct pointLarge {
+    UINT16 x;
+    UINT16 y;
+} pointLarge;
+
 typedef struct animationState {
     UINT8 length; //amount of frames in animation
     UINT8 speed; //amount of ticks before moving to next frame
@@ -19,10 +23,11 @@ typedef struct animationState {
 enum direction {up=0x1, down=0x2, right=0x4, left=0x8};
 enum directionPrevious {upPrevious=0x10, downPrevious=0x20, rightPrevious=0x40, leftPrevious=0x80};
 enum entityFlags {facing=0x1, airborn=0x2};
+
 // This struct should be based off of everything a player needs but can probably be reused
 typedef struct entity {
     UBYTE direction; // Byte representing 8 boolean values. 0-3 are current , 4-7 are previous
-    point position;
+    pointLarge position;
     // Bit 1 is 0 if facing left else facing right.
     // Bit 2 is 0 if on ground 1 if in air
     UBYTE flags; 
@@ -63,6 +68,7 @@ void updateDirection(entity *e);
 void setAnimation(entity *e, animationState *a);
 void updateAnimation(entity *e);
 INT8 checkTileCollision(UINT8 current, INT8 move);
+void drawEntity(entity *e);
 
 void updatePosition(entity *e) {
     //check flags and update animations
@@ -95,19 +101,22 @@ void updatePosition(entity *e) {
         e->position.y += inc;
     }
     //
+}
 
+extern pointLarge bkgPosition;
 
-    if(e->flags & 1) {
+void drawEntity(entity *e) {
+    if(e->flags & facing) {
         set_sprite_prop(e->spriteAddress, S_FLIPX);
         set_sprite_prop(e->spriteAddress + 1U, S_FLIPX);
-        move_sprite(e->spriteAddress, e->position.x + 8U, e->position.y);
-        move_sprite(e->spriteAddress + 1U, e->position.x, e->position.y);
+        move_sprite(e->spriteAddress, e->position.x + 8U - bkgPosition.x, e->position.y);
+        move_sprite(e->spriteAddress + 1U, e->position.x - bkgPosition.x, e->position.y);
     }
     else {
         set_sprite_prop(e->spriteAddress, !S_FLIPX);
         set_sprite_prop(e->spriteAddress + 1U, !S_FLIPX);
-        move_sprite(e->spriteAddress, e->position.x, e->position.y);
-        move_sprite(e->spriteAddress + 1U, ((e->position.x) + 8U), e->position.y);
+        move_sprite(e->spriteAddress, e->position.x - bkgPosition.x, e->position.y);
+        move_sprite(e->spriteAddress + 1U, ((e->position.x) + 8U) - bkgPosition.x, e->position.y);
     }
 }
 
