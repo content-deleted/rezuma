@@ -12,9 +12,7 @@ void updateSwitches();
 void initSound();
 void updateWindow();
 
-void SetTile(UINT16 r, UINT8 t);
-
-UINT8 i,j = 0;
+UINT16 i,j = 0;
 
 entity Player = {
     0x00,
@@ -94,25 +92,29 @@ const VRAMWIDTH = 0x20;
 UINT16 BKPREVIOUSX = 0U;
 UINT8 a;
 UINT16 b;
+//UINT8 tempTileColumn[SCREENTILEHEIGHT] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 void updateWindow() {
-    if( Player.position.x > SCREENWIDTH/2 && (Player.position.x + SCREENWIDTH/2) < levelWidth * 8 ) 
+    if( Player.position.x > SCREENWIDTH/2U && (Player.position.x + SCREENWIDTH/2U) < levelWidth * 8 ) 
     {    
+        unsigned char tempTileColumn[18];
+
         BKPREVIOUSX = bkgPosition.x;
-        bkgPosition.x = Player.position.x - SCREENWIDTH/2;
+        bkgPosition.x = Player.position.x - SCREENWIDTH/2U;
         
-        if( BKPREVIOUSX/8 != bkgPosition.x/8 ) {
-            a =  (bkgPosition.x / 8 + (( bkgPosition.x < BKPREVIOUSX ) ? 0 : SCREENTILEWIDTH)) % VRAMWIDTH;    
-            b =  ( ( bkgPosition.x < BKPREVIOUSX ) ? bkgPosition.x : bkgPosition.x + SCREENWIDTH ) / 16 ;
+        if( BKPREVIOUSX/8U != bkgPosition.x/8U ) 
+        {
+            a =  (bkgPosition.x / 8U + (( bkgPosition.x < BKPREVIOUSX ) ? 0U : SCREENTILEWIDTH)) % VRAMWIDTH;    
+            b =  ( ( bkgPosition.x < BKPREVIOUSX ) ? bkgPosition.x : bkgPosition.x + SCREENWIDTH ) / 8U ;
 
             // Load tiles into vram
-            for(i = 0; i < SCREENTILEHEIGHT; i++) 
+            for(i = 0U; i < 18; i++) 
             {
-                set_bkg_tiles(a, i, 
-                0x1, 0x1, 
-                &testMapLarge + levelWidth/2 * i + b);
+                tempTileColumn[i] = testMapLarge[100 * i + b];
             }
-
+            set_bkg_tiles(a, 0U, 
+            1U, 18, 
+            &tempTileColumn);
         }
 
         move_bkg(bkgPosition.x, bkgPosition.y);
