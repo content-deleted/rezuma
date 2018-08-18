@@ -91,11 +91,11 @@ void updatePosition(entity *e) {
  
     // Check directions and update position
     if(e->direction & left) {
-        horizontalMovement = -1; 
+        horizontalMovement = (joypad() & J_B) ? -2 : -1; 
         e->flags &= ~facing;
     }
     if(e->direction & right) {
-        horizontalMovement = 1; 
+        horizontalMovement = (joypad() & J_B) ? 2 : 1; 
         e->flags |= facing;
     }
     
@@ -198,7 +198,7 @@ INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
     UINT16 locX = current->x;
     UINT16 locY = current->y - 1U;
 
-    if(move > 0) locX += move + 8U; 
+    if(move > 0) locX += move + 7U; 
     else locX -= -move + 8U;
 
     ret = (checkTile(locX, locY))

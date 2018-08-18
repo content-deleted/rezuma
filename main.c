@@ -3,8 +3,7 @@
 #include "PlayerSpriteSheet.c"
 #include "entity.c"
 #include "testTileData.c"
-#include "testMapLarge.c"
-//#include "collisionMap1.c"
+#include "testMapLarge2.c"
 
 //asm funcs
 //void setTile(UINT8 x, UINT8 y, unsigned char *);
