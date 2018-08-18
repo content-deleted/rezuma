@@ -22,15 +22,16 @@ typedef struct animationState {
 
 enum direction {up=0x1, down=0x2, right=0x4, left=0x8};
 enum directionPrevious {upPrevious=0x10, downPrevious=0x20, rightPrevious=0x40, leftPrevious=0x80};
-enum entityFlags {facing=0x1, airborn=0x2};
+enum entityFlags {facing=0x1, jumping=0x2, falling=0x4};
 
 // This struct should be based off of everything a player needs but can probably be reused
+// It's getting hacky at this point because of poor design decisions
 typedef struct entity {
     UBYTE direction; // Byte representing 8 boolean values. 0-3 are current , 4-7 are previous
     pointLarge position;
     // Bit 1 is 0 if facing left else facing right.
     // Bit 2 is 0 if on ground 1 if in air
-    UBYTE flags; 
+    UBYTE flags;
 
     UBYTE spriteAddress; // Stores the starting position of the current spite
     animationState *currentAnimation;
@@ -42,24 +43,31 @@ typedef struct entity {
 //Player Animations
 
 animationState PlayerStand = {
-    2U, //length 
+    2U, //length 1 Indexed
     32U, //speed
     0x00,
     0x00
 };
 
 animationState PlayerRun = {
-    3U, //length 
+    3U, //length 1 Indexed
     10U, //speed
     0x00,
     0xC //first frame
 };
 
 animationState PlayerJump = {
-    1U, //length zero indexed
-    3U, //speed
+    3U, //length zero indexed
+    5U, //speed
     0x01, //play once
     0x14 //first frame
+};
+
+animationState PlayerFall = {
+    2U, //length 1 indexed
+    3U, //speed
+    0x00, //loop
+    0x24 //first frame
 };
 
 //global define functions
@@ -67,40 +75,63 @@ void updatePosition(entity *e);
 void updateDirection(entity *e);
 void setAnimation(entity *e, animationState *a);
 void updateAnimation(entity *e);
-INT8 checkTileCollision(UINT8 current, INT8 move);
 void drawEntity(entity *e);
+INT8 checkTileCollisionX(pointLarge *current, INT8 move);
+INT8 checkTileCollisionY(pointLarge *current, INT8 move);
 
 void updatePosition(entity *e) {
-    //check flags and update animations
-    if(!(e->flags & airborn)) setAnimation(e, (e->direction & left) || (e->direction & right) ? &PlayerRun : &PlayerStand);
+    //declare local var
+    INT8 verticalMovement = 0;
+    INT8 horizontalMovement = 0;
 
-    //update animation 
+    // Check flags and update animations
+    if(!(e->flags & jumping) && !(e->flags & falling)) setAnimation(e, (e->direction & left) || (e->direction & right) ? &PlayerRun : &PlayerStand);
+
     updateAnimation(e);
  
-    //check directions and update position
+    // Check directions and update position
     if(e->direction & left) {
-        e->position.x--; 
+        horizontalMovement = -1; 
         e->flags &= ~facing;
     }
     if(e->direction & right) {
-        e->position.x++; 
+        horizontalMovement = 1; 
         e->flags |= facing;
     }
     
     //check jump 
-    //this is temp code and will need to be refactored when collisions are added
-    if((joypad() & J_A) && !(e->flags & airborn)) {
-        e->flags |= airborn;
+   
+    if((joypad() & J_A) && !(e->flags & jumping) && !(e->flags & falling)) {
+        e->flags |= jumping;
         setAnimation(e, &PlayerJump);
     }
 
-    if(e->flags & airborn){
-        UINT8 verticalMovement = (e->currentFrame < e->currentAnimation->length) ? -2 : 1;
-        INT8 inc = checkTileCollision(e->position.y, verticalMovement);
-        if(!inc) e->flags &= ~airborn;
-        e->position.y += inc;
+    if(e->flags & jumping && !(e->flags & falling) ) {
+        INT8 inc; //define local 
+        verticalMovement = -3;
+        inc = checkTileCollisionY(&e->position, verticalMovement);
+        if(!inc || !(joypad() & J_A) || e->currentFrame + 1 >= PlayerJump.length) {
+            e->flags &= ~jumping;
+            e->flags |= falling;
+        }
+        else e->position.y -= -inc;
+    } 
+    else {
+        INT8 inc;
+        verticalMovement = 2;
+        inc = checkTileCollisionY(&e->position, verticalMovement);
+        if(inc != 0) {
+            e->flags |= falling;
+            setAnimation(e, &PlayerFall);
+            e->position.y += inc;
+        }
+        else  e->flags &= ~falling;
     }
-    //
+
+    // Tile Collision X direction 
+    if(horizontalMovement > 0) e->position.x += checkTileCollisionX(&e->position, horizontalMovement);
+
+    if(horizontalMovement < 0) e->position.x -= -checkTileCollisionX(&e->position, horizontalMovement);
 }
 
 extern pointLarge bkgPosition;
@@ -138,9 +169,7 @@ void updateAnimation(entity *e) {
         e->currentFrame++;
     }
 
-    if(e->currentFrame >= e->currentAnimation->length && !(e->currentAnimation->properties & 0x01)){
-        e->currentFrame = 0U;
-    }
+    if(e->currentFrame >= e->currentAnimation->length && !(e->currentAnimation->properties & 0x01)) e->currentFrame = 0U;
 
     // Here the sprite address on entity represents which sprite slot we use in sprite memory
     // The current animation address is where in VRAM the first tile of the first frame is stored
@@ -154,12 +183,46 @@ void updateAnimation(entity *e) {
     if(e->ticks < 0xFF) e->ticks++;
 }
 
-//needs to be updated when tile collisions are a thing
+extern unsigned char * currentCollisionMap;
+extern UINT8 levelWidth;
+
+BOOLEAN checkTile(UINT16 x, UINT16 y) {
+    return (currentCollisionMap[ ( (UINT16) 50U * (y/16U) + (x/16U)) ]); // change this to check with list of solid tiles
+}
+
 // This function should return the amount to move the player
 // If there is a collision then it's the amount to that collision
 // Else it's just the movement
-INT8 checkTileCollision(UINT8 current, INT8 move) {
-    return (current+move > 0x81 || current+move <= 0x00)
-    ? 0 // When we move to tile collision itll look more like: (move % 8) * move
-    : move;
+INT8 ret;
+INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
+    UINT16 locX = current->x + move; 
+  //+ move + (move > 0) ? 16U : 0U;
+    UINT16 locY = current->y;
+    //if (move > 0) locX = locX + 2U;
+    ret = (checkTile(locX, locY) ) //|| checkTile(locX, locY + 16U))
+           ? 0//(current->x + move) % 8
+           : move;
+    if( ret == 0 ){
+         set_sprite_tile(4U,0U);
+         move_sprite(4U, 10, 10);
+    }
+    else
+        move_sprite(4U, 0, 0);
+    return ret;
+}
+
+INT8 checkTileCollisionY(pointLarge *current, INT8 move) {
+    UINT16 locX = current->x;
+    UINT16 locY = current->y;
+    locY += move; //+ (INT16) move + (move > 0) ? 16U : 0U;
+    ret = (checkTile(locX, locY) ) //|| checkTile(locX + 16U, locY))
+           ? 0//(current->y + move) % 8
+           : move;
+    if( ret == 0 ){
+         set_sprite_tile(5U,0U);
+         move_sprite(5U, 40, 10);
+    }
+    else 
+        move_sprite(5U, 0, 0);
+    return ret;
 }
