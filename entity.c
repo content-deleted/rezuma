@@ -196,11 +196,13 @@ BOOLEAN checkTile(UINT16 x, UINT16 y) {
 INT8 ret;
 INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
     UINT16 locX = current->x;
-    UINT16 locY = current->y;
-    if(move > 0) locX += move; 
-    else locX -= -move;
-    ret = (checkTile(locX, locY) ) //|| checkTile(locX, locY + 16U))
-           ? 0//(current->x + move) % 8
+    UINT16 locY = current->y - 1U;
+
+    if(move > 0) locX += move + 8U; 
+    else locX -= -move + 8U;
+
+    ret = (checkTile(locX, locY))
+           ? 0
            : move;
     if( ret == 0 ){
          set_sprite_tile(4U,0U);
@@ -213,10 +215,12 @@ INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
 
 INT8 checkTileCollisionY(pointLarge *current, INT8 move) {
     UINT16 locX = current->x;
-    UINT16 locY = current->y;
+    UINT16 locY = current->y - 1U;
+
     if(move > 0) locY += move; 
-    else locY -= -move;
-    ret = (checkTile(locX, locY) ) //|| checkTile(locX + 16U, locY))
+    else locY -= -move + 7U;
+
+    ret = (checkTile(locX - 7, locY) || checkTile(locX + 7U, locY))
            ? 0//(current->y + move) % 8
            : move;
     if( ret == 0 ){
