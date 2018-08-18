@@ -195,10 +195,10 @@ BOOLEAN checkTile(UINT16 x, UINT16 y) {
 // Else it's just the movement
 INT8 ret;
 INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
-    UINT16 locX = current->x + move; 
-  //+ move + (move > 0) ? 16U : 0U;
+    UINT16 locX = current->x;
     UINT16 locY = current->y;
-    //if (move > 0) locX = locX + 2U;
+    if(move > 0) locX += move; 
+    else locX -= -move;
     ret = (checkTile(locX, locY) ) //|| checkTile(locX, locY + 16U))
            ? 0//(current->x + move) % 8
            : move;
@@ -214,7 +214,8 @@ INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
 INT8 checkTileCollisionY(pointLarge *current, INT8 move) {
     UINT16 locX = current->x;
     UINT16 locY = current->y;
-    locY += move; //+ (INT16) move + (move > 0) ? 16U : 0U;
+    if(move > 0) locY += move; 
+    else locY -= -move;
     ret = (checkTile(locX, locY) ) //|| checkTile(locX + 16U, locY))
            ? 0//(current->y + move) % 8
            : move;
