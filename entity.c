@@ -204,12 +204,14 @@ INT8 checkTileCollisionX(pointLarge *current, INT8 move) {
     ret = (checkTile(locX, locY))
            ? 0
            : move;
+    /* This displays a sprite if X colliding
     if( ret == 0 ){
          set_sprite_tile(4U,0U);
          move_sprite(4U, 10, 10);
     }
     else
         move_sprite(4U, 0, 0);
+    */
     return ret;
 }
 
@@ -223,11 +225,14 @@ INT8 checkTileCollisionY(pointLarge *current, INT8 move) {
     ret = (checkTile(locX - 7, locY) || checkTile(locX + 7U, locY))
            ? 0//(current->y + move) % 8
            : move;
+    
+    /* This displays a sprite if Y colliding
     if( ret == 0 ){
          set_sprite_tile(5U,0U);
          move_sprite(5U, 40, 10);
     }
     else 
         move_sprite(5U, 0, 0);
+    */
     return ret;
 }

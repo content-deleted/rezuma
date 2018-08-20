@@ -17,7 +17,6 @@ void updateWindow();
 
 // Map info
 unsigned char * currentMap = &testMapLarge;
-//unsigned char currentMapColumns[36U * 100U];
 unsigned char collisionMap [16*50];
 unsigned char * currentCollisionMap = &collisionMap;
 
