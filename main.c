@@ -20,6 +20,7 @@ void updateSwitches();
 void initSound();
 void updateWindow();
 void cycleGarbage();
+void spawnBlock(UINT16 x, UINT16 y);
 
 // Map info
 unsigned char * currentMap = &testMapLarge;
@@ -54,7 +55,11 @@ void main() {
         updatePosition(&Player);
         // Once we know new player position we can scroll background and handle load new bkg tiles
         updateWindow();
+
+        if(joypad() & J_B) spawnBlock(Player.position.x, Player.position.y);
         cycleGarbage();
+        
+        
         // Finally draw player taking into account new bkg position
         drawEntity(&Player);
 
@@ -149,16 +154,29 @@ void updateWindow() {
     }
 } 
 
-void spawnBlock (pointLarge p) {
-    // Clamp the point to our tile grid (mod 4)
+UBYTE VRAMgarbBlock [] = {0x0D,0x0E,0x0F,0x10};
 
-    // Replace the block in vram with one of our garbage blocks
+void spawnBlock (UINT16 x, UINT16 y) {
+    // Clamp the point to our tile grid (mod 16)
+    x = ( (x) / 16);
+    y = ( (y + 8U) / 16);
 
     // Write a 1 into the level collision data at this location 
+    collisionMap[(UINT16) levelWidth/2 * (y) + (x)] = 0x01;
+
+    // Format for map data
+    x *= 2U; y *= 2U;
+
+    // Replace the block in vram with one of our garbage blocks
+    set_bkg_tiles( x % VRAMWIDTH, y, 2U, 2U, &VRAMgarbBlock);
+
+    // Write blocks into map data as well
+    for(i = 0; i < 2; i++) for(j = 0; j < 2; j++) currentMap[(x + i) * levelHeight + y + j] = VRAMgarbBlock[i+j];
 }
 
-UBYTE VRAMgarbBlock = 0x08;
-void cycleGarbage () {
-    
-    set_bkg_data(VRAMgarbBlock, 0x04, &Player);
+UINT8 GARBOCOUNT = 0x00;
+
+void cycleGarbage () {  
+    set_bkg_data(VRAMgarbBlock[0], 0x04, ( GARBOCOUNT + 0x40 ) );
+    GARBOCOUNT++; if (GARBOCOUNT>0x08) GARBOCOUNT = 0x00;
 }

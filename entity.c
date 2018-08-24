@@ -91,11 +91,11 @@ void updatePosition(entity *e) {
  
     // Check directions and update position
     if(e->direction & left) {
-        horizontalMovement = (joypad() & J_B) ? -2 : -1; 
+        horizontalMovement = -1; // ENABLE FOR RUN // (joypad() & J_B) ? -2 : -1; 
         e->flags &= ~facing;
     }
     if(e->direction & right) {
-        horizontalMovement = (joypad() & J_B) ? 2 : 1; 
+        horizontalMovement = 1; // ENABLE FOR RUN // (joypad() & J_B) ? 2 : 1; 
         e->flags |= facing;
     }
     
