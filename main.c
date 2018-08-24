@@ -1,19 +1,25 @@
+// Library
 #include <gb/gb.h>
 //#include <gb/cgb.h>
-#include "PlayerSpriteSheet.c"
+
+// Project
 #include "entity.c"
+
+// Assets
+#include "PlayerSpriteSheet.c"
 #include "testTileData.c"
 #include "testMapLargeVert.c"
 
 //asm funcs
 //void setTile(UINT8 x, UINT8 y, unsigned char *);
 
-//global def
+//global func def
 void init();
 void checkInput();
 void updateSwitches();
 void initSound();
 void updateWindow();
+void cycleGarbage();
 
 // Map info
 unsigned char * currentMap = &testMapLarge;
@@ -48,6 +54,7 @@ void main() {
         updatePosition(&Player);
         // Once we know new player position we can scroll background and handle load new bkg tiles
         updateWindow();
+        cycleGarbage();
         // Finally draw player taking into account new bkg position
         drawEntity(&Player);
 
@@ -141,3 +148,17 @@ void updateWindow() {
         move_bkg(bkgPosition.x, bkgPosition.y);
     }
 } 
+
+void spawnBlock (pointLarge p) {
+    // Clamp the point to our tile grid (mod 4)
+
+    // Replace the block in vram with one of our garbage blocks
+
+    // Write a 1 into the level collision data at this location 
+}
+
+UBYTE VRAMgarbBlock = 0x08;
+void cycleGarbage () {
+    
+    set_bkg_data(VRAMgarbBlock, 0x04, &Player);
+}

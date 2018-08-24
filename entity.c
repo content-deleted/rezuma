@@ -187,7 +187,7 @@ extern unsigned char * currentCollisionMap;
 extern UINT8 levelWidth;
 
 BOOLEAN checkTile(UINT16 x, UINT16 y) {
-    return (currentCollisionMap[ ( (UINT16) 50U * (y/16U) + (x/16U)) ]); // change this to check with list of solid tiles
+    return (currentCollisionMap[ ( (UINT16) 50U * (y/16U) + (x/16U)) ]); 
 }
 
 // This function should return the amount to move the player
@@ -223,7 +223,7 @@ INT8 checkTileCollisionY(pointLarge *current, INT8 move) {
     else locY -= -move + 7U;
 
     ret = (checkTile(locX - 7, locY) || checkTile(locX + 7U, locY))
-           ? 0//(current->y + move) % 8
+           ? 0
            : move;
     
     /* This displays a sprite if Y colliding
@@ -234,5 +234,6 @@ INT8 checkTileCollisionY(pointLarge *current, INT8 move) {
     else 
         move_sprite(5U, 0, 0);
     */
+
     return ret;
 }
