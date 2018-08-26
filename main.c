@@ -4,6 +4,8 @@
 
 // Project
 #include "entity.c"
+#include "player.c"
+#include "enemy.c"
 
 // Assets
 #include "Assets/PlayerSpriteSheet.c"
@@ -34,16 +36,6 @@ const SCREENTILEHEIGHT = SCREENHEIGHT/8;
 const VRAMWIDTH = 0x20;
 
 UINT16 i,j = 0;
-
-entity Player = {
-    0x00,
-    {0x20,0x70},
-    0x00,
-    0U,
-    &PlayerStand,
-    0U,
-    0U,
-};
 
 void main() {
 
