@@ -6,9 +6,9 @@
 #include "entity.c"
 
 // Assets
-#include "PlayerSpriteSheet.c"
-#include "testTileData.c"
-#include "testMapLargeVert.c"
+#include "Assets/PlayerSpriteSheet.c"
+#include "Assets/testTileData.c"
+#include "Assets/testMap.c"
 
 //asm funcs
 //void setTile(UINT8 x, UINT8 y, unsigned char *);
@@ -52,7 +52,7 @@ void main() {
 		updateSwitches();
 		checkInput();
         
-        updatePosition(&Player);
+        updatePlayerPosition(&Player);
         // Once we know new player position we can scroll background and handle load new bkg tiles
         updateWindow();
 

@@ -71,7 +71,7 @@ animationState PlayerFall = {
 };
 
 //global define functions
-void updatePosition(entity *e);
+void updatePlayerPosition(entity *e);
 void updateDirection(entity *e);
 void setAnimation(entity *e, animationState *a);
 void updateAnimation(entity *e);
@@ -79,7 +79,7 @@ void drawEntity(entity *e);
 INT8 checkTileCollisionX(pointLarge *current, INT8 move);
 INT8 checkTileCollisionY(pointLarge *current, INT8 move);
 
-void updatePosition(entity *e) {
+void updatePlayerPosition(entity *e) {
     //declare local var
     INT8 verticalMovement = 0;
     INT8 horizontalMovement = 0;
@@ -108,7 +108,7 @@ void updatePosition(entity *e) {
 
     if(e->flags & jumping && !(e->flags & falling) ) {
         INT8 inc; //define local 
-        verticalMovement = -3;
+        verticalMovement = -2;
         inc = checkTileCollisionY(&e->position, verticalMovement);
         if(!inc || !(joypad() & J_A) || e->currentFrame + 1 >= PlayerJump.length) {
             e->flags &= ~jumping;
