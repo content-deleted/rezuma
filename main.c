@@ -11,6 +11,7 @@
 #include "Assets/PlayerSpriteSheet.c"
 #include "Assets/testTileData.c"
 #include "Assets/testMap.c"
+#include "Assets/spook.c"
 
 //asm funcs
 //void setTile(UINT8 x, UINT8 y, unsigned char *);
@@ -43,17 +44,25 @@ void main() {
 	while(1) {
 		updateSwitches();
 		checkInput();
+
+        // Update animations
+        updateAnimation(&Player);
+        updateAnimation(&Enemy);
         
         updatePlayerPosition(&Player);
         // Once we know new player position we can scroll background and handle load new bkg tiles
         updateWindow();
 
+        // Now update all enemies
+        updateFollowerPosition(&Enemy);
+
+        // Check to add blocks (this should be somewhere else)
         if(joypad() & J_B) spawnBlock(Player.position.x, Player.position.y);
         cycleGarbage();
         
-        
         // Finally draw player taking into account new bkg position
         drawEntity(&Player);
+        drawEntity(&Enemy);
 
         wait_vbl_done(); // Wait until VBLANK to avoid corrupting visual memory
     }
@@ -72,6 +81,7 @@ void init() {
     // Set the sprite data to 8x16 and load memory 
     SPRITES_8x16;
     set_sprite_data(0U, 4U*11U, PlayerSpriteSheet);
+    set_sprite_data(4U*11U, 4U*5U, spook);
 
     // Set the player sprite tiles
     set_sprite_tile(0U,0U);
