@@ -26,10 +26,10 @@ void updateFollowerPosition(entity *e);
 UBYTE enemyInternalTimer;
 
 void updateFollowerPosition(entity *e) {
-    if(enemyInternalTimer % 2 == 0){ 
+   if(enemyInternalTimer % 4 == 0){ 
         if(Player.position.x > e->position.x) e->position.x++; else e->position.x--;
         if(Player.position.y > e->position.y) e->position.y++; else e->position.y--;
-    }
+    } 
 
     // Put this update routine somewhere else
     enemyInternalTimer++;

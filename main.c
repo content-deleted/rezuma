@@ -60,11 +60,11 @@ void main() {
         if(joypad() & J_B) spawnBlock(Player.position.x, Player.position.y);
         cycleGarbage();
         
+         wait_vbl_done(); // Wait until VBLANK to avoid corrupting visual memory
+
         // Finally draw player taking into account new bkg position
         drawEntity(&Player);
         drawEntity(&Enemy);
-
-        wait_vbl_done(); // Wait until VBLANK to avoid corrupting visual memory
     }
 }
 
@@ -158,8 +158,10 @@ void updateWindow() {
 
 UBYTE VRAMgarbBlock [] = {0x0D,0x0E,0x0F,0x10};
 
+UINT8 tempPos;
+
 void spawnBlock (UINT16 x, UINT16 y) {
-    // Clamp the point to our tile grid (mod 16)
+    // Clamp the point to our tile grid
     x = ( (x) / 16);
     y = ( (y + 8U) / 16);
 
@@ -173,8 +175,21 @@ void spawnBlock (UINT16 x, UINT16 y) {
     set_bkg_tiles( x % VRAMWIDTH, y, 2U, 2U, &VRAMgarbBlock);
 
     // Write blocks into map data as well
-    for(i = 0; i < 2; i++) for(j = 0; j < 2; j++) currentMap[(x + i) * levelHeight + y + j] = VRAMgarbBlock[i+j];
+    tempPos = 0;
+    for(i = 0; i < 2; i++) for(j = 0; j < 2; j++) {
+        currentMap[(x + i) * levelHeight + y + j] = VRAMgarbBlock[tempPos];
+        tempPos++;
+    }
 }
+
+/*
+void writeMapBlock (UBYTE *target, UBYTE *data, UINT16 height, UINT16 width) {
+   UINT8 pos = 0;
+   for(i = 0; i < 2; i++) for(j = 0; j < 2; j++) {
+       currentMap[(x + i) * levelHeight + y + j] = VRAMgarbBlock[pos];
+       pos++;
+   }
+} */
 
 UINT8 GARBOCOUNT = 0x00;
 

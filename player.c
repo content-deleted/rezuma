@@ -49,7 +49,6 @@ void updatePlayerPosition(entity *e);
 // This is the main movement code for the player
 // It is very simple and bad and lazy
 
-
 void updatePlayerPosition(entity *e) {
     //declare local var
     INT8 verticalMovement = 0;
